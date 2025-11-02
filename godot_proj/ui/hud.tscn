@@ -1,0 +1,13 @@
+[gd_scene load_steps=2 format=3 uid="uid://x08xubcoa80u"]
+
+[ext_resource type="PackedScene" uid="uid://l4phuybg122h" path="res://ui/main_life_bar.tscn" id="1_rbyyf"]
+
+[node name="HUD" type="VBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="MainLifeBar" parent="." instance=ExtResource("1_rbyyf")]
+layout_mode = 2

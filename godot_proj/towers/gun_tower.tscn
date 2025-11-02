@@ -1,0 +1,129 @@
+[gd_scene load_steps=9 format=3 uid="uid://xt1bnv7ml8er"]
+
+[ext_resource type="Script" uid="uid://ji0bbr4yka1d" path="res://towers/tower.gd" id="1_44wu5"]
+[ext_resource type="Script" uid="uid://daofky34fs1sc" path="res://base_classes/state/state_machine.gd" id="2_53f0q"]
+[ext_resource type="Script" uid="uid://ciweostottjfn" path="res://base_classes/state/default_loading_state.gd" id="3_53f0q"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_44wu5"]
+albedo_color = Color(0, 0, 1, 1)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_eb8tv"]
+material = SubResource("StandardMaterial3D_44wu5")
+
+[sub_resource type="GDScript" id="GDScript_ye67j"]
+script/source = "extends Node
+
+var targeted_enemy: Enemy
+"
+
+[sub_resource type="GDScript" id="GDScript_53f0q"]
+script/source = "extends State
+
+@export var _firing: Node
+
+var _enemy_in_range: bool
+var _root: Tower
+
+func _begin_state():
+	_root = owner as Tower
+	_enemy_in_range = false
+
+func _goto_state():
+	if _enemy_in_range: return \"Firing\"
+	return \"\"
+
+func _process(_delta: float) -> void:
+	if not is_active: return
+	var near_enemy := _nearest_enemy()
+	if near_enemy == null: return
+	if _root.position.distance_to(near_enemy.position) <= _root.range:
+		_firing.targeted_enemy = near_enemy
+		_enemy_in_range = true
+
+func _nearest_enemy() -> Enemy:
+	var near_dist: float = 1000.0
+	var near_enemy: Enemy = null
+	for obj in get_tree().get_nodes_in_group(\"enemies\"):
+		var enemy := obj as Enemy
+		if enemy.is_dead: continue
+		var dist := _root.position.distance_to(enemy.position)
+		if dist < near_dist:
+			near_dist = dist
+			near_enemy = enemy
+	return near_enemy
+"
+
+[sub_resource type="GDScript" id="GDScript_x2vrg"]
+script/source = "extends State
+
+@export var _firing: Node
+@export var _fire_time: float
+@export var _damage: float
+
+var _enemy_dead: bool
+var _enemy_out_of_range: bool
+var _fire_timer: float
+var _root: Tower
+
+func _begin_state():
+	_root = owner as Tower
+	_fire_timer = _fire_time
+	_enemy_dead = false
+	_enemy_out_of_range = false
+
+func _goto_state() -> String:
+	if _enemy_dead or _enemy_out_of_range: return \"Searching\"
+	return \"\"
+
+func _physics_process(delta: float) -> void:
+	if not is_active: return
+	var enemy := _firing.targeted_enemy as Enemy
+	if enemy.is_dead:
+		_enemy_dead = true
+		return
+	if _root.position.distance_to(enemy.position) > _root.range:
+		_enemy_out_of_range = true
+		return
+	_fire_timer -= delta
+	if _fire_timer <= 0:
+		_fire_timer += _fire_time
+		_fire()
+
+func _fire():
+	var enemy := _firing.targeted_enemy as Enemy
+	enemy.apply_damage(_damage, 0)
+"
+
+[node name="GunTower" type="Node3D"]
+script = ExtResource("1_44wu5")
+range = 5.0
+metadata/_custom_type_script = "uid://ji0bbr4yka1d"
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+mesh = SubResource("CylinderMesh_eb8tv")
+
+[node name="Firing" type="Node" parent="."]
+script = SubResource("GDScript_ye67j")
+
+[node name="StateMachine" type="Node" parent="."]
+script = ExtResource("2_53f0q")
+_default = "Loading"
+metadata/_custom_type_script = "uid://daofky34fs1sc"
+
+[node name="Loading" type="Node" parent="StateMachine"]
+script = ExtResource("3_53f0q")
+_first_state = "Searching"
+metadata/_custom_type_script = "uid://ciweostottjfn"
+
+[node name="Searching" type="Node" parent="StateMachine" node_paths=PackedStringArray("_firing")]
+script = SubResource("GDScript_53f0q")
+_firing = NodePath("../../Firing")
+metadata/_custom_type_script = "uid://baflu1sdbq7c2"
+
+[node name="Firing" type="Node" parent="StateMachine" node_paths=PackedStringArray("_firing")]
+script = SubResource("GDScript_x2vrg")
+_firing = NodePath("../../Firing")
+_fire_time = 0.2
+_damage = 1.0
+metadata/_custom_type_script = "uid://baflu1sdbq7c2"

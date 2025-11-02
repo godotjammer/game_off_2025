@@ -1,0 +1,120 @@
+[gd_scene load_steps=7 format=3 uid="uid://cxpnq2n7fumbq"]
+
+[ext_resource type="PackedScene" uid="uid://3fkn3myahmk3" path="res://towers/models/test_tower.glb" id="1_raiqg"]
+[ext_resource type="Script" uid="uid://daofky34fs1sc" path="res://base_classes/state/state_machine.gd" id="2_xl05o"]
+[ext_resource type="Script" uid="uid://ciweostottjfn" path="res://base_classes/state/default_loading_state.gd" id="3_d8lyh"]
+
+[sub_resource type="GDScript" id="GDScript_jfm37"]
+script/source = "extends Node
+
+var targeted_enemy: Enemy
+"
+
+[sub_resource type="GDScript" id="GDScript_2jd3t"]
+script/source = "extends State
+
+@export var _firing: Node
+
+var _enemy_in_range: bool
+var _root: Tower
+
+func _begin_state():
+	_root = owner as Tower
+	_enemy_in_range = false
+
+func _goto_state():
+	if _enemy_in_range: return \"Firing\"
+	return \"\"
+
+func _process(_delta: float) -> void:
+	if not is_active: return
+	var near_enemy := _nearest_enemy()
+	if near_enemy == null: return
+	if _root.position.distance_to(near_enemy.position) <= _root.range:
+		_firing.targeted_enemy = near_enemy
+		_enemy_in_range = true
+
+func _nearest_enemy() -> Enemy:
+	var near_dist: float = 1000.0
+	var near_enemy: Enemy = null
+	for obj in get_tree().get_nodes_in_group(\"enemies\"):
+		var enemy := obj as Enemy
+		if enemy.is_dead: continue
+		var dist := _root.position.distance_to(enemy.position)
+		if dist < near_dist:
+			near_dist = dist
+			near_enemy = enemy
+	return near_enemy
+"
+
+[sub_resource type="GDScript" id="GDScript_ubryo"]
+script/source = "extends State
+
+@export var _firing: Node
+@export var _fire_time: float
+@export var _damage: float
+@export var _rotator: MeshInstance3D
+
+var _enemy_dead: bool
+var _enemy_out_of_range: bool
+var _fire_timer: float
+var _root: Tower
+
+func _begin_state():
+	_root = owner as Tower
+	_fire_timer = _fire_time
+	_enemy_dead = false
+	_enemy_out_of_range = false
+
+func _goto_state() -> String:
+	if _enemy_dead or _enemy_out_of_range: return \"Searching\"
+	return \"\"
+
+func _physics_process(delta: float) -> void:
+	if not is_active: return
+	var enemy := _firing.targeted_enemy as Enemy
+	if enemy.is_dead:
+		_enemy_dead = true
+		return
+	if _root.position.distance_to(enemy.position) > _root.range:
+		_enemy_out_of_range = true
+		return
+	_rotator.look_at(enemy.position, Vector3.UP, true)
+	_fire_timer -= delta
+	if _fire_timer <= 0:
+		_fire_timer += _fire_time
+		_fire()
+
+func _fire():
+	var enemy := _firing.targeted_enemy as Enemy
+	enemy.apply_damage(_damage, 0)
+"
+
+[node name="TestTower" instance=ExtResource("1_raiqg")]
+range = 5.0
+
+[node name="Firing" type="Node" parent="." index="2"]
+script = SubResource("GDScript_jfm37")
+
+[node name="StateMachine" type="Node" parent="." index="3"]
+script = ExtResource("2_xl05o")
+_default = "Loading"
+metadata/_custom_type_script = "uid://daofky34fs1sc"
+
+[node name="Loading" type="Node" parent="StateMachine" index="0"]
+script = ExtResource("3_d8lyh")
+_first_state = "Searching"
+metadata/_custom_type_script = "uid://ciweostottjfn"
+
+[node name="Searching" type="Node" parent="StateMachine" index="1" node_paths=PackedStringArray("_firing")]
+script = SubResource("GDScript_2jd3t")
+_firing = NodePath("../../Firing")
+metadata/_custom_type_script = "uid://baflu1sdbq7c2"
+
+[node name="Firing" type="Node" parent="StateMachine" index="2" node_paths=PackedStringArray("_firing", "_rotator")]
+script = SubResource("GDScript_ubryo")
+_firing = NodePath("../../Firing")
+_fire_time = 0.2
+_damage = 1.0
+_rotator = NodePath("../../TurretTop")
+metadata/_custom_type_script = "uid://baflu1sdbq7c2"
