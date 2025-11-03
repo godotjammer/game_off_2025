@@ -1,0 +1,121 @@
+[gd_scene load_steps=9 format=3 uid="uid://dyr751ccox11v"]
+
+[ext_resource type="PackedScene" uid="uid://cd7fpxda5h38u" path="res://enemies/flying_saucer/flying_saucer.glb" id="1_ip5ok"]
+[ext_resource type="PackedScene" uid="uid://73422gw5ld8n" path="res://enemies/life_bar.tscn" id="2_ad68n"]
+[ext_resource type="Script" uid="uid://daofky34fs1sc" path="res://base_classes/state/state_machine.gd" id="3_pcwbr"]
+[ext_resource type="Script" uid="uid://ciweostottjfn" path="res://base_classes/state/default_loading_state.gd" id="4_qrgqq"]
+
+[sub_resource type="GDScript" id="GDScript_0qs4a"]
+script/source = "extends Node
+
+signal hit()
+signal dead()
+signal life_change(current: float, max: float)
+
+@export var max_life: float
+
+var current_life: float
+
+func _ready() -> void:
+	current_life = max_life
+
+func apply_damage(amount: float, type: int):
+	current_life -= amount
+	life_change.emit(current_life, max_life)
+	hit.emit()
+	if current_life < 0:
+		dead.emit()
+"
+
+[sub_resource type="GDScript" id="GDScript_y0fdv"]
+script/source = "extends State
+
+var _is_dead: bool
+
+func _begin_state():
+	_is_dead = false
+
+func _goto_state() -> String:
+	if _is_dead: return \"Dead\"
+	return \"\"
+
+func _on_dead() -> void:
+	_is_dead = true
+"
+
+[sub_resource type="GDScript" id="GDScript_d3642"]
+script/source = "extends State
+
+@export var _speed: float
+
+var _root: Enemy
+
+func _begin_state():
+	_root = owner as Enemy
+
+func _physics_process(delta: float) -> void:
+	if not is_active: return
+	var prev_ratio := _root.progress_ratio
+	_root.progress += _speed * delta
+	if _root.progress_ratio < prev_ratio:
+		_root.do_attack()
+		_root.queue_free()
+"
+
+[sub_resource type="GDScript" id="GDScript_obwd8"]
+script/source = "extends State
+
+var _root: Enemy
+
+func _begin_state():
+	_root = owner as Enemy
+	_root.is_dead = true
+	MoneyTracker.get_instance().coins += _root.coin_value
+	var timer = get_tree().create_timer(1.0)
+	timer.timeout.connect(_on_time)
+
+func _on_time():
+	_root.queue_free()
+"
+
+[node name="flying_saucer" groups=["enemies"] instance=ExtResource("1_ip5ok")]
+damage = 10.0
+coin_value = 5
+
+[node name="Disk" parent="." index="0"]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0, 0)
+
+[node name="Spheres" parent="." index="1"]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0, 0)
+
+[node name="LifeBar" parent="." index="2" instance=ExtResource("2_ad68n")]
+
+[node name="LifeMonitor" type="Node" parent="." index="3"]
+script = SubResource("GDScript_0qs4a")
+max_life = 5.0
+
+[node name="StateMachine" type="Node" parent="." index="4"]
+script = ExtResource("3_pcwbr")
+_default = "Loading"
+metadata/_custom_type_script = "uid://daofky34fs1sc"
+
+[node name="Loading" type="Node" parent="StateMachine" index="0"]
+script = ExtResource("4_qrgqq")
+_first_state = "Moving"
+metadata/_custom_type_script = "uid://ciweostottjfn"
+
+[node name="DeathListener" type="Node" parent="StateMachine" index="1"]
+script = SubResource("GDScript_y0fdv")
+metadata/_custom_type_script = "uid://baflu1sdbq7c2"
+
+[node name="Moving" type="Node" parent="StateMachine/DeathListener" index="0"]
+script = SubResource("GDScript_d3642")
+_speed = 2.0
+metadata/_custom_type_script = "uid://baflu1sdbq7c2"
+
+[node name="Dead" type="Node" parent="StateMachine" index="2"]
+script = SubResource("GDScript_obwd8")
+metadata/_custom_type_script = "uid://baflu1sdbq7c2"
+
+[connection signal="dead" from="LifeMonitor" to="StateMachine/DeathListener" method="_on_dead"]
+[connection signal="life_change" from="LifeMonitor" to="LifeBar" method="set_life"]

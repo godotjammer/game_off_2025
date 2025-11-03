@@ -1,0 +1,19 @@
+[gd_scene load_steps=2 format=3 uid="uid://cqxrmg1bo2utt"]
+
+[ext_resource type="Script" uid="uid://cvs8i88eemvsk" path="res://ui/money_tracker.gd" id="1_82bhf"]
+
+[node name="MoneyTracker" type="HBoxContainer" node_paths=PackedStringArray("_quan_label")]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_82bhf")
+_quan_label = NodePath("Quantity")
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 2
+text = "Coins"
+
+[node name="Quantity" type="Label" parent="."]
+layout_mode = 2

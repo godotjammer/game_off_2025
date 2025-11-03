@@ -6,7 +6,7 @@ const _towers: Array[String] = [
 ]
 
 const _enemies: Array[String] = [
-	"res://enemies/square_enemy.tscn"
+	"res://enemies/flying_saucer/flying_saucer.tscn"
 ]
 
 const _tower_select_menu := "res://ui/tower_select.tscn"

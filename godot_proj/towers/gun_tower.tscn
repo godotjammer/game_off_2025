@@ -36,7 +36,7 @@ func _process(_delta: float) -> void:
 	if not is_active: return
 	var near_enemy := _nearest_enemy()
 	if near_enemy == null: return
-	if _root.position.distance_to(near_enemy.position) <= _root.range:
+	if _root.position.distance_to(near_enemy.position) <= _root.tower_range:
 		_firing.targeted_enemy = near_enemy
 		_enemy_in_range = true
 
@@ -81,7 +81,7 @@ func _physics_process(delta: float) -> void:
 	if enemy.is_dead:
 		_enemy_dead = true
 		return
-	if _root.position.distance_to(enemy.position) > _root.range:
+	if _root.position.distance_to(enemy.position) > _root.tower_range:
 		_enemy_out_of_range = true
 		return
 	_fire_timer -= delta
@@ -96,7 +96,7 @@ func _fire():
 
 [node name="GunTower" type="Node3D"]
 script = ExtResource("1_44wu5")
-range = 5.0
+tower_range = 5.0
 metadata/_custom_type_script = "uid://ji0bbr4yka1d"
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]

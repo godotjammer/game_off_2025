@@ -1,0 +1,80 @@
+[gd_scene load_steps=7 format=3 uid="uid://dj82yqi6548kk"]
+
+[ext_resource type="Script" uid="uid://cjetgxlvdpyph" path="res://levels/level.gd" id="1_65yy3"]
+[ext_resource type="PackedScene" uid="uid://bwdd7gly3mjqb" path="res://levels/test_level/test_level.glb" id="2_qo0ko"]
+[ext_resource type="PackedScene" uid="uid://be5hemj0odyoy" path="res://levels/tower_bases/test_level_tower_base.tscn" id="3_8th66"]
+
+[sub_resource type="Curve3D" id="Curve3D_srpys"]
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 9.463585, 0, -20.04908, 0.28072834, 0, -1.731163, -0.28072834, 0, 1.731163, 9.307625, 0, -15.682251, 0.9669552, 0, -0.43668938, -0.9669552, 0, 0.43668938, 3.7866175, 0, -11.845619, 0.18715143, 0, -2.885272, -0.18715143, 0, 2.885272, -1.5628324, 0, -7.369549, -0.4678843, 0, -0.24953651, 0.4678843, 0, 0.24953651, 1.727936, 0, -3.8292432, -0.04678631, 0, -2.074276, 0.04678631, 0, 2.074276, 5.923278, 0, -0.35132122, 0.6394378, 0, -0.3275175, -0.6394378, 0, 0.3275175, 2.273799, 0, 3.1733894, 2.6669245, 0, -0.01559639, -2.6669245, 0, 0.01559639, -6.2884398, 0, 4.530246, 0, 0, 0, 0, 0, 0, -19.966185, 0, 4.4834576),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0)
+}
+point_count = 9
+
+[sub_resource type="GDScript" id="GDScript_x25rp"]
+script/source = "extends Node
+
+@export var _path: Path3D
+@export var _level_life: Node
+
+func _ready() -> void:
+	_timer()
+
+func _timer():
+	await get_tree().create_timer(2.0).timeout
+	_spawn_enemy()
+	_timer()
+
+func _spawn_enemy():
+	var enemy := Factory.get_instance().spawn_square_enemy()
+	enemy.progress = 0
+	enemy.attack.connect(_level_life.apply_damage)
+	_path.add_child(enemy)
+"
+
+[sub_resource type="GDScript" id="GDScript_gmgay"]
+script/source = "extends Node
+
+signal dead()
+
+@export var max_life: float
+
+var _current_life: float
+
+func _ready() -> void:
+	_current_life = max_life
+
+func apply_damage(amount: float):
+	_current_life -= amount
+	MainLifeBar.get_instance().set_life(_current_life, max_life)
+	if _current_life <= 0:
+		dead.emit()
+		print(\"Level Over\")
+"
+
+[node name="TestLevel" type="Node3D"]
+script = ExtResource("1_65yy3")
+metadata/_custom_type_script = "uid://cjetgxlvdpyph"
+
+[node name="test_level" parent="." instance=ExtResource("2_qo0ko")]
+
+[node name="Path3D" type="Path3D" parent="."]
+curve = SubResource("Curve3D_srpys")
+
+[node name="TestLevelTowerBase" parent="." instance=ExtResource("3_8th66")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5780435, 0.01, -0.50530005)
+
+[node name="TestLevelTowerBase2" parent="." instance=ExtResource("3_8th66")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2953758, 0.01, -12.729921)
+
+[node name="TestLevelTowerBase3" parent="." instance=ExtResource("3_8th66")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.7313168, 0.01, -7.816715)
+
+[node name="EnemySpawner" type="Node" parent="." node_paths=PackedStringArray("_path", "_level_life")]
+script = SubResource("GDScript_x25rp")
+_path = NodePath("../Path3D")
+_level_life = NodePath("../LevelLife")
+
+[node name="LevelLife" type="Node" parent="."]
+script = SubResource("GDScript_gmgay")
+max_life = 100.0
