@@ -1,0 +1,30 @@
+[gd_scene load_steps=4 format=3 uid="uid://d3cc57pw32bqw"]
+
+[ext_resource type="PackedScene" uid="uid://dj82yqi6548kk" path="res://levels/test_level.tscn" id="1_p31eu"]
+[ext_resource type="PackedScene" uid="uid://x08xubcoa80u" path="res://ui/hud.tscn" id="2_ptf0g"]
+
+[sub_resource type="GDScript" id="GDScript_p31eu"]
+script/source = "extends Camera3D
+
+@export var _speed: float
+
+func _process(delta: float) -> void:
+	var motion := Input.get_vector(\"left\", \"right\", \"up\", \"down\")
+	position += Vector3(motion.x, 0, motion.y) * _speed * delta
+"
+
+[node name="GameScene" type="Node3D"]
+
+[node name="TestLevel" parent="." instance=ExtResource("1_p31eu")]
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(0.99999994, 0, 0, 0, 0.49999997, 0.86602545, 0, -0.86602545, 0.49999997, 0, 10, 1.407)
+projection = 1
+size = 20.0
+script = SubResource("GDScript_p31eu")
+_speed = 5.0
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.49999997, 0.86602545, 0, -0.86602545, 0.49999997, 0, 23.140888, 26.310009)
+
+[node name="HUD" parent="." instance=ExtResource("2_ptf0g")]

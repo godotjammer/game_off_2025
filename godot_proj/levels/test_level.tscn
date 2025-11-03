@@ -1,0 +1,87 @@
+[gd_scene load_steps=8 format=3 uid="uid://dj82yqi6548kk"]
+
+[ext_resource type="Script" uid="uid://cjetgxlvdpyph" path="res://levels/level.gd" id="1_46lwt"]
+[ext_resource type="PackedScene" uid="uid://be5hemj0odyoy" path="res://levels/tower_bases/test_level_tower_base.tscn" id="2_x25rp"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_srpys"]
+albedo_color = Color(0, 1, 0, 1)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_46lwt"]
+material = SubResource("StandardMaterial3D_srpys")
+size = Vector2(40, 40)
+
+[sub_resource type="Curve3D" id="Curve3D_srpys"]
+_data = {
+"points": PackedVector3Array(0, 0, 0, 0, 0, 0, 10.102409, 0, -18.474802, 2.819275, 0, -3.545453, -2.819275, 0, 3.545453, 5.31818, 0, -5.809417, 0.9824753, 0, -3.374587, -0.9824753, 0, 3.374587, -7.090906, 0, 2.2212465, -1.9649487, 0, -2.6484098, 1.9649487, 0, 2.6484098, -5.6385536, 0, 12.7081, 0, 0, 0, 0, 0, 0, 16.723434, 0, 14.267246),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0)
+}
+point_count = 5
+
+[sub_resource type="GDScript" id="GDScript_x25rp"]
+script/source = "extends Node
+
+@export var _path: Path3D
+@export var _level_life: Node
+
+func _ready() -> void:
+	_timer()
+
+func _timer():
+	await get_tree().create_timer(2.0).timeout
+	_spawn_enemy()
+	_timer()
+
+func _spawn_enemy():
+	var enemy := Factory.get_instance().spawn_square_enemy()
+	enemy.progress = 0
+	enemy.attack.connect(_level_life.apply_damage)
+	_path.add_child(enemy)
+"
+
+[sub_resource type="GDScript" id="GDScript_gmgay"]
+script/source = "extends Node
+
+signal dead()
+
+@export var max_life: float
+
+var _current_life: float
+
+func _ready() -> void:
+	_current_life = max_life
+
+func apply_damage(amount: float):
+	_current_life -= amount
+	MainLifeBar.get_instance().set_life(_current_life, max_life)
+	if _current_life <= 0:
+		dead.emit()
+		print(\"Level Over\")
+"
+
+[node name="TestLevel" type="Node3D"]
+script = ExtResource("1_46lwt")
+metadata/_custom_type_script = "uid://cjetgxlvdpyph"
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("PlaneMesh_46lwt")
+
+[node name="Path3D" type="Path3D" parent="."]
+curve = SubResource("Curve3D_srpys")
+
+[node name="TestLevelTowerBase" parent="." instance=ExtResource("2_x25rp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.6548247, 0.01, 2.1616259)
+
+[node name="TestLevelTowerBase2" parent="." instance=ExtResource("2_x25rp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.163246, 0.01, 11.802685)
+
+[node name="TestLevelTowerBase3" parent="." instance=ExtResource("2_x25rp")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.7569537, 0.01, -6.069956)
+
+[node name="EnemySpawner" type="Node" parent="." node_paths=PackedStringArray("_path", "_level_life")]
+script = SubResource("GDScript_x25rp")
+_path = NodePath("../Path3D")
+_level_life = NodePath("../LevelLife")
+
+[node name="LevelLife" type="Node" parent="."]
+script = SubResource("GDScript_gmgay")
+max_life = 100.0

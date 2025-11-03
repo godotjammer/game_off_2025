@@ -1,0 +1,32 @@
+[gd_scene load_steps=2 format=3 uid="uid://l4phuybg122h"]
+
+[ext_resource type="Script" uid="uid://rd3tsccvqpyq" path="res://ui/main_life_bar.gd" id="1_qlwab"]
+
+[node name="MainLifeBar" type="CenterContainer" node_paths=PackedStringArray("_life_rect")]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_qlwab")
+_life_rect = NodePath("HBoxContainer/CenterContainer/ColorRect2")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer"]
+layout_mode = 2
+text = "Life Remaining "
+
+[node name="CenterContainer" type="CenterContainer" parent="HBoxContainer"]
+layout_mode = 2
+
+[node name="ColorRect" type="ColorRect" parent="HBoxContainer/CenterContainer"]
+custom_minimum_size = Vector2(400, 40)
+layout_mode = 2
+color = Color(1, 0, 0, 1)
+
+[node name="ColorRect2" type="ColorRect" parent="HBoxContainer/CenterContainer"]
+custom_minimum_size = Vector2(400, 40)
+layout_mode = 2
+color = Color(9.0004505e-06, 0.691436, 5.7756904e-07, 1)

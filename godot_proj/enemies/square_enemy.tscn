@@ -1,0 +1,126 @@
+[gd_scene load_steps=11 format=3 uid="uid://4byu3uhjfne8"]
+
+[ext_resource type="Script" uid="uid://0wtek6lah7on" path="res://enemies/enemy.gd" id="1_jvi6k"]
+[ext_resource type="Script" uid="uid://daofky34fs1sc" path="res://base_classes/state/state_machine.gd" id="2_un54n"]
+[ext_resource type="Script" uid="uid://ciweostottjfn" path="res://base_classes/state/default_loading_state.gd" id="3_8tfi2"]
+[ext_resource type="PackedScene" uid="uid://73422gw5ld8n" path="res://enemies/life_bar.tscn" id="4_tt3ku"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_jvi6k"]
+albedo_color = Color(1, 0, 0, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_5swpw"]
+material = SubResource("StandardMaterial3D_jvi6k")
+size = Vector3(0.5, 0.5, 0.5)
+
+[sub_resource type="GDScript" id="GDScript_tt3ku"]
+script/source = "extends Node
+
+signal hit()
+signal dead()
+signal life_change(current: float, max: float)
+
+@export var max_life: float
+
+var current_life: float
+
+func _ready() -> void:
+	current_life = max_life
+
+func apply_damage(amount: float, type: int):
+	current_life -= amount
+	life_change.emit(current_life, max_life)
+	hit.emit()
+	if current_life < 0:
+		dead.emit()
+"
+
+[sub_resource type="GDScript" id="GDScript_drwc2"]
+script/source = "extends State
+
+var _is_dead: bool
+
+func _begin_state():
+	_is_dead = false
+
+func _goto_state() -> String:
+	if _is_dead: return \"Dead\"
+	return \"\"
+
+func _on_dead() -> void:
+	_is_dead = true
+"
+
+[sub_resource type="GDScript" id="GDScript_un54n"]
+script/source = "extends State
+
+@export var _speed: float
+
+var _root: Enemy
+
+func _begin_state():
+	_root = owner as Enemy
+
+func _physics_process(delta: float) -> void:
+	if not is_active: return
+	var prev_ratio := _root.progress_ratio
+	_root.progress += _speed * delta
+	if _root.progress_ratio < prev_ratio:
+		_root.do_attack()
+		_root.queue_free()
+"
+
+[sub_resource type="GDScript" id="GDScript_aw1nj"]
+script/source = "extends State
+
+var _root: Enemy
+
+func _begin_state():
+	_root = owner as Enemy
+	_root.is_dead = true
+	var timer = get_tree().create_timer(1.0)
+	timer.timeout.connect(_on_time)
+
+func _on_time():
+	_root.queue_free()
+"
+
+[node name="SquareEnemy" type="PathFollow3D" groups=["enemies"]]
+script = ExtResource("1_jvi6k")
+damage = 20.0
+metadata/_custom_type_script = "uid://0wtek6lah7on"
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 0)
+mesh = SubResource("BoxMesh_5swpw")
+
+[node name="LifeBar" parent="." instance=ExtResource("4_tt3ku")]
+
+[node name="LifeMonitor" type="Node" parent="."]
+script = SubResource("GDScript_tt3ku")
+max_life = 10.0
+
+[node name="StateMachine" type="Node" parent="."]
+script = ExtResource("2_un54n")
+_default = "Loading"
+metadata/_custom_type_script = "uid://daofky34fs1sc"
+
+[node name="Loading" type="Node" parent="StateMachine"]
+script = ExtResource("3_8tfi2")
+_first_state = "Moving"
+metadata/_custom_type_script = "uid://ciweostottjfn"
+
+[node name="DeathListener" type="Node" parent="StateMachine"]
+script = SubResource("GDScript_drwc2")
+metadata/_custom_type_script = "uid://baflu1sdbq7c2"
+
+[node name="Moving" type="Node" parent="StateMachine/DeathListener"]
+script = SubResource("GDScript_un54n")
+_speed = 8.0
+metadata/_custom_type_script = "uid://baflu1sdbq7c2"
+
+[node name="Dead" type="Node" parent="StateMachine"]
+script = SubResource("GDScript_aw1nj")
+metadata/_custom_type_script = "uid://baflu1sdbq7c2"
+
+[connection signal="dead" from="LifeMonitor" to="StateMachine/DeathListener" method="_on_dead"]
+[connection signal="life_change" from="LifeMonitor" to="LifeBar" method="set_life"]

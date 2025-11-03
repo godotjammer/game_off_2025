@@ -1,0 +1,28 @@
+[gd_scene load_steps=5 format=3 uid="uid://73422gw5ld8n"]
+
+[ext_resource type="Script" uid="uid://bsn7srsrdc25j" path="res://enemies/life_bar.gd" id="1_ytvxl"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_o1eb6"]
+albedo_color = Color(0, 0.58431375, 0, 1)
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_o1eb6"]
+material = SubResource("StandardMaterial3D_o1eb6")
+radius = 0.05
+height = 0.6
+
+[sub_resource type="GDScript" id="GDScript_ytvxl"]
+script/source = "extends MeshInstance3D
+
+func set_life(current: float, total: float):
+	scale.y = current / total
+"
+
+[node name="LifeBar" type="Node3D"]
+top_level = true
+script = ExtResource("1_ytvxl")
+metadata/_custom_type_script = "uid://bsn7srsrdc25j"
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(-4.371139e-08, 1, 4.371139e-08, 0, -4.371139e-08, 1, 1, 4.371139e-08, 1.9106855e-15, 0, 0, 0)
+mesh = SubResource("CapsuleMesh_o1eb6")
+script = SubResource("GDScript_ytvxl")
