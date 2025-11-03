@@ -77,6 +77,7 @@ var _root: Enemy
 func _begin_state():
 	_root = owner as Enemy
 	_root.is_dead = true
+	MoneyTracker.get_instance().coins += _root.coin_value
 	var timer = get_tree().create_timer(1.0)
 	timer.timeout.connect(_on_time)
 
@@ -87,6 +88,7 @@ func _on_time():
 [node name="SquareEnemy" type="PathFollow3D" groups=["enemies"]]
 script = ExtResource("1_jvi6k")
 damage = 20.0
+coin_value = 10
 metadata/_custom_type_script = "uid://0wtek6lah7on"
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
@@ -115,7 +117,7 @@ metadata/_custom_type_script = "uid://baflu1sdbq7c2"
 
 [node name="Moving" type="Node" parent="StateMachine/DeathListener"]
 script = SubResource("GDScript_un54n")
-_speed = 8.0
+_speed = 2.0
 metadata/_custom_type_script = "uid://baflu1sdbq7c2"
 
 [node name="Dead" type="Node" parent="StateMachine"]

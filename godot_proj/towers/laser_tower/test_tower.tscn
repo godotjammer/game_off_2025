@@ -1,8 +1,9 @@
-[gd_scene load_steps=7 format=3 uid="uid://cxpnq2n7fumbq"]
+[gd_scene load_steps=8 format=3 uid="uid://cxpnq2n7fumbq"]
 
-[ext_resource type="PackedScene" uid="uid://3fkn3myahmk3" path="res://towers/models/test_tower.glb" id="1_raiqg"]
-[ext_resource type="Script" uid="uid://daofky34fs1sc" path="res://base_classes/state/state_machine.gd" id="2_xl05o"]
-[ext_resource type="Script" uid="uid://ciweostottjfn" path="res://base_classes/state/default_loading_state.gd" id="3_d8lyh"]
+[ext_resource type="PackedScene" uid="uid://3fkn3myahmk3" path="res://towers/models/test_tower.glb" id="1_2nr1r"]
+[ext_resource type="PackedScene" uid="uid://cb3r6rv8jqro0" path="res://towers/laser_tower/laser_shot.tscn" id="2_avygr"]
+[ext_resource type="Script" uid="uid://daofky34fs1sc" path="res://base_classes/state/state_machine.gd" id="2_kdrrp"]
+[ext_resource type="Script" uid="uid://ciweostottjfn" path="res://base_classes/state/default_loading_state.gd" id="3_avygr"]
 
 [sub_resource type="GDScript" id="GDScript_jfm37"]
 script/source = "extends Node
@@ -30,7 +31,7 @@ func _process(_delta: float) -> void:
 	if not is_active: return
 	var near_enemy := _nearest_enemy()
 	if near_enemy == null: return
-	if _root.position.distance_to(near_enemy.position) <= _root.range:
+	if _root.position.distance_to(near_enemy.position) <= _root.tower_range:
 		_firing.targeted_enemy = near_enemy
 		_enemy_in_range = true
 
@@ -54,6 +55,7 @@ script/source = "extends State
 @export var _fire_time: float
 @export var _damage: float
 @export var _rotator: MeshInstance3D
+@export var _shot: Node3D
 
 var _enemy_dead: bool
 var _enemy_out_of_range: bool
@@ -65,10 +67,14 @@ func _begin_state():
 	_fire_timer = _fire_time
 	_enemy_dead = false
 	_enemy_out_of_range = false
+	_shot.visible = true
 
 func _goto_state() -> String:
 	if _enemy_dead or _enemy_out_of_range: return \"Searching\"
 	return \"\"
+
+func _end_state():
+	_shot.visible = false
 
 func _physics_process(delta: float) -> void:
 	if not is_active: return
@@ -76,10 +82,13 @@ func _physics_process(delta: float) -> void:
 	if enemy.is_dead:
 		_enemy_dead = true
 		return
-	if _root.position.distance_to(enemy.position) > _root.range:
+	if _root.position.distance_to(enemy.position) > _root.tower_range:
 		_enemy_out_of_range = true
 		return
-	_rotator.look_at(enemy.position, Vector3.UP, true)
+	_rotator.look_at(Vector3(enemy.global_position.x, _rotator.global_position.y, enemy.global_position.z), Vector3.UP, true)
+	var shot_dist := _shot.global_position.distance_to(enemy.global_position)
+	_shot.look_at(enemy.global_position, Vector3.UP, true)
+	_shot.scale.z = shot_dist
 	_fire_timer -= delta
 	if _fire_timer <= 0:
 		_fire_timer += _fire_time
@@ -90,19 +99,23 @@ func _fire():
 	enemy.apply_damage(_damage, 0)
 "
 
-[node name="TestTower" instance=ExtResource("1_raiqg")]
-range = 5.0
+[node name="TestTower" instance=ExtResource("1_2nr1r")]
+tower_range = 5.0
+
+[node name="LaserShot" parent="Laser" index="0" instance=ExtResource("2_avygr")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1555789, 0.87635046)
+visible = false
 
 [node name="Firing" type="Node" parent="." index="2"]
 script = SubResource("GDScript_jfm37")
 
 [node name="StateMachine" type="Node" parent="." index="3"]
-script = ExtResource("2_xl05o")
+script = ExtResource("2_kdrrp")
 _default = "Loading"
 metadata/_custom_type_script = "uid://daofky34fs1sc"
 
 [node name="Loading" type="Node" parent="StateMachine" index="0"]
-script = ExtResource("3_d8lyh")
+script = ExtResource("3_avygr")
 _first_state = "Searching"
 metadata/_custom_type_script = "uid://ciweostottjfn"
 
@@ -111,10 +124,11 @@ script = SubResource("GDScript_2jd3t")
 _firing = NodePath("../../Firing")
 metadata/_custom_type_script = "uid://baflu1sdbq7c2"
 
-[node name="Firing" type="Node" parent="StateMachine" index="2" node_paths=PackedStringArray("_firing", "_rotator")]
+[node name="Firing" type="Node" parent="StateMachine" index="2" node_paths=PackedStringArray("_firing", "_rotator", "_shot")]
 script = SubResource("GDScript_ubryo")
 _firing = NodePath("../../Firing")
 _fire_time = 0.2
 _damage = 1.0
-_rotator = NodePath("../../TurretTop")
+_rotator = NodePath("../../Laser")
+_shot = NodePath("../../Laser/LaserShot")
 metadata/_custom_type_script = "uid://baflu1sdbq7c2"

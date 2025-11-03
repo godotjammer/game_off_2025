@@ -3,6 +3,7 @@ class_name Enemy extends PathFollow3D
 signal attack(damage: float)
 
 @export var damage: float
+@export var coin_value: int
 
 var is_dead: bool
 
