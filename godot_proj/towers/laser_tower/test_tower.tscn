@@ -1,9 +1,10 @@
-[gd_scene load_steps=8 format=3 uid="uid://cxpnq2n7fumbq"]
+[gd_scene load_steps=9 format=3 uid="uid://cxpnq2n7fumbq"]
 
 [ext_resource type="PackedScene" uid="uid://3fkn3myahmk3" path="res://towers/models/test_tower.glb" id="1_2nr1r"]
 [ext_resource type="PackedScene" uid="uid://cb3r6rv8jqro0" path="res://towers/laser_tower/laser_shot.tscn" id="2_avygr"]
 [ext_resource type="Script" uid="uid://daofky34fs1sc" path="res://base_classes/state/state_machine.gd" id="2_kdrrp"]
 [ext_resource type="Script" uid="uid://ciweostottjfn" path="res://base_classes/state/default_loading_state.gd" id="3_avygr"]
+[ext_resource type="Script" uid="uid://baflu1sdbq7c2" path="res://base_classes/state/state.gd" id="5_avygr"]
 
 [sub_resource type="GDScript" id="GDScript_jfm37"]
 script/source = "extends Node
@@ -24,6 +25,7 @@ func _begin_state():
 	_enemy_in_range = false
 
 func _goto_state():
+	if _root.is_icon: return \"Icon\"
 	if _enemy_in_range: return \"Firing\"
 	return \"\"
 
@@ -119,12 +121,16 @@ script = ExtResource("3_avygr")
 _first_state = "Searching"
 metadata/_custom_type_script = "uid://ciweostottjfn"
 
-[node name="Searching" type="Node" parent="StateMachine" index="1" node_paths=PackedStringArray("_firing")]
+[node name="Icon" type="Node" parent="StateMachine" index="1"]
+script = ExtResource("5_avygr")
+metadata/_custom_type_script = "uid://baflu1sdbq7c2"
+
+[node name="Searching" type="Node" parent="StateMachine" index="2" node_paths=PackedStringArray("_firing")]
 script = SubResource("GDScript_2jd3t")
 _firing = NodePath("../../Firing")
 metadata/_custom_type_script = "uid://baflu1sdbq7c2"
 
-[node name="Firing" type="Node" parent="StateMachine" index="2" node_paths=PackedStringArray("_firing", "_rotator", "_shot")]
+[node name="Firing" type="Node" parent="StateMachine" index="3" node_paths=PackedStringArray("_firing", "_rotator", "_shot")]
 script = SubResource("GDScript_ubryo")
 _firing = NodePath("../../Firing")
 _fire_time = 0.2

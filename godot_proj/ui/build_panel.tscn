@@ -1,0 +1,33 @@
+[gd_scene load_steps=3 format=3 uid="uid://cjyqmppn5h4cg"]
+
+[ext_resource type="PackedScene" uid="uid://cw7lo72o6ms4b" path="res://ui/tower_select.tscn" id="1_vcv5a"]
+
+[sub_resource type="GDScript" id="GDScript_vcv5a"]
+script/source = "extends Button
+
+@export var _select_menu: Control
+
+func _on_pressed() -> void:
+	_select_menu.visible = true
+"
+
+[node name="BuildPanel" type="VBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TowerSelect" parent="." instance=ExtResource("1_vcv5a")]
+visible = false
+layout_mode = 2
+
+[node name="Button" type="Button" parent="." node_paths=PackedStringArray("_select_menu")]
+custom_minimum_size = Vector2(60, 60)
+layout_mode = 2
+size_flags_horizontal = 8
+text = "Build"
+script = SubResource("GDScript_vcv5a")
+_select_menu = NodePath("../TowerSelect")
+
+[connection signal="pressed" from="Button" to="Button" method="_on_pressed"]

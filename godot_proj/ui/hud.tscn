@@ -1,19 +1,40 @@
-[gd_scene load_steps=3 format=3 uid="uid://x08xubcoa80u"]
+[gd_scene load_steps=4 format=3 uid="uid://x08xubcoa80u"]
 
 [ext_resource type="PackedScene" uid="uid://l4phuybg122h" path="res://ui/main_life_bar.tscn" id="1_rbyyf"]
 [ext_resource type="PackedScene" uid="uid://cqxrmg1bo2utt" path="res://ui/money_tracker.tscn" id="2_276te"]
+[ext_resource type="PackedScene" uid="uid://cjyqmppn5h4cg" path="res://ui/build_panel.tscn" id="3_546lt"]
 
-[node name="HUD" type="VBoxContainer"]
+[node name="HUD" type="Control"]
+layout_mode = 3
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
 offset_left = -261.5
 offset_right = 261.5
-offset_bottom = 40.0
+offset_bottom = 67.0
 grow_horizontal = 2
 
-[node name="MainLifeBar" parent="." instance=ExtResource("1_rbyyf")]
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 0
+offset_left = -0.5
+offset_top = 82.0
+offset_right = 522.5
+offset_bottom = 149.0
+
+[node name="MainLifeBar" parent="VBoxContainer" instance=ExtResource("1_rbyyf")]
 layout_mode = 2
 
-[node name="MoneyTracker" parent="." instance=ExtResource("2_276te")]
+[node name="MoneyTracker" parent="VBoxContainer" instance=ExtResource("2_276te")]
 layout_mode = 2
+
+[node name="BuildPanel" parent="." instance=ExtResource("3_546lt")]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+offset_left = 1526.5
+offset_top = 1976.0
+offset_right = 1526.5
+offset_bottom = 1976.0
+grow_horizontal = 0
+grow_vertical = 0
