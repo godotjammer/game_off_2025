@@ -12,7 +12,7 @@ func _ready() -> void:
 	var close := Button.new()
 	close.text = "Cancel"
 	close.pressed.connect(func():
-		queue_free()
+		visible = false
 		)
 	add_child(close)
 
@@ -31,6 +31,7 @@ func _update_buttons(amount: int):
 		_list[tower].disabled = amount < tower.cost
 
 func _on_button_press(tower: TowerDesc):
-	tower_selected.emit(tower.file.instantiate())
-	MoneyTracker.get_instance().coins -= tower.cost
-	queue_free()
+	var marker := Factory.get_instance().spawn_tower_marker()
+	marker.tower = tower
+	visible = false
+	get_tree().current_scene.add_child(marker)
