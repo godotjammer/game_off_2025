@@ -1,6 +1,7 @@
 class_name TowerSelect extends VBoxContainer
 
-signal tower_selected(tower: Tower)
+@export var tower_container: Container
+@export var upgrade_container: Container
 
 var _list: Dictionary[TowerDesc, Button]
 
@@ -23,7 +24,10 @@ func _create_button(tower: TowerDesc):
 	button.pressed.connect(func():
 		_on_button_press(tower)
 		)
-	add_child(button)
+	if tower.tower_type == TowerDesc.TowerType.TOWER:
+		tower_container.add_child(button)
+	else:
+		upgrade_container.add_child(button)
 	_list[tower] = button
 
 func _update_buttons(amount: int):

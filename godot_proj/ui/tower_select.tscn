@@ -2,8 +2,19 @@
 
 [ext_resource type="Script" uid="uid://botnmcgfrcr2e" path="res://ui/tower_select.gd" id="1_8ues1"]
 
-[node name="TowerSelect" type="VBoxContainer"]
+[node name="TowerSelect" type="VBoxContainer" node_paths=PackedStringArray("tower_container", "upgrade_container")]
 offset_right = 93.0
 offset_bottom = 66.0
 script = ExtResource("1_8ues1")
+tower_container = NodePath("HBoxContainer/Towers")
+upgrade_container = NodePath("HBoxContainer/Upgrades")
 metadata/_custom_type_script = "uid://botnmcgfrcr2e"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="Towers" type="VBoxContainer" parent="HBoxContainer"]
+layout_mode = 2
+
+[node name="Upgrades" type="VBoxContainer" parent="HBoxContainer"]
+layout_mode = 2

@@ -94,7 +94,7 @@ func _fire():
 	enemy.apply_damage(_damage, 0)
 "
 
-[node name="GunTower" type="Node3D"]
+[node name="GunTower" type="Node3D" groups=["towers"]]
 script = ExtResource("1_44wu5")
 tower_range = 5.0
 metadata/_custom_type_script = "uid://ji0bbr4yka1d"

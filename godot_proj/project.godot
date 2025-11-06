@@ -24,6 +24,7 @@ window/size/viewport_height=2160
 
 enemies=""
 placements=""
+towers=""
 
 [input]
 

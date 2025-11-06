@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://cxressfuvnxy"]
+
+[ext_resource type="PackedScene" uid="uid://8x88c1j7qc0l" path="res://upgrades/speed_upgrade/speed_upgrade.glb" id="1_wu0l0"]
+
+[node name="SpeedUpgrade" groups=["towers"] instance=ExtResource("1_wu0l0")]
+fire_rate = 0.5

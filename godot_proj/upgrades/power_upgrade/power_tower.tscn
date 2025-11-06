@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://cn058d8h34emf"]
+
+[ext_resource type="PackedScene" uid="uid://blrs6u2lishcb" path="res://upgrades/power_upgrade/power_upgrade.glb" id="1_chagv"]
+
+[node name="PowerTower" groups=["towers"] instance=ExtResource("1_chagv")]
+damage = 0.1
