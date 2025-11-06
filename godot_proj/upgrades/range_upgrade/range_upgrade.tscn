@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://cs12sdtlrujie"]
+
+[ext_resource type="PackedScene" uid="uid://ccl76o46t8rst" path="res://upgrades/range_upgrade/range_upgrade.glb" id="1_amad4"]
+
+[node name="RangeUpgrade" groups=["towers"] instance=ExtResource("1_amad4")]
+tower_range = 0.8

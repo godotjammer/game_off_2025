@@ -33,7 +33,7 @@ func _process(_delta: float) -> void:
 	if not is_active: return
 	var near_enemy := _nearest_enemy()
 	if near_enemy == null: return
-	if _root.position.distance_to(near_enemy.position) <= _root.tower_range:
+	if _root.position.distance_to(near_enemy.position) <= _root.get_linked_range():
 		_firing.targeted_enemy = near_enemy
 		_enemy_in_range = true
 
@@ -54,8 +54,6 @@ func _nearest_enemy() -> Enemy:
 script/source = "extends State
 
 @export var _firing: Node
-@export var _fire_time: float
-@export var _damage: float
 @export var _rotator: MeshInstance3D
 @export var _shot: Node3D
 
@@ -66,7 +64,7 @@ var _root: Tower
 
 func _begin_state():
 	_root = owner as Tower
-	_fire_timer = _fire_time
+	_fire_timer = 0
 	_enemy_dead = false
 	_enemy_out_of_range = false
 	_shot.visible = true
@@ -84,7 +82,7 @@ func _physics_process(delta: float) -> void:
 	if enemy.is_dead:
 		_enemy_dead = true
 		return
-	if _root.position.distance_to(enemy.position) > _root.tower_range:
+	if _root.position.distance_to(enemy.position) > _root.get_linked_range():
 		_enemy_out_of_range = true
 		return
 	_rotator.look_at(Vector3(enemy.global_position.x, _rotator.global_position.y, enemy.global_position.z), Vector3.UP, true)
@@ -93,16 +91,19 @@ func _physics_process(delta: float) -> void:
 	_shot.scale.z = shot_dist
 	_fire_timer -= delta
 	if _fire_timer <= 0:
-		_fire_timer += _fire_time
+		_fire_timer += 1.0 / _root.get_linked_rate()
+		print(_root.get_linked_rate())
 		_fire()
 
 func _fire():
 	var enemy := _firing.targeted_enemy as Enemy
-	enemy.apply_damage(_damage, 0)
+	enemy.apply_damage(_root.get_linked_damage(), 0)
 "
 
-[node name="TestTower" instance=ExtResource("1_2nr1r")]
+[node name="TestTower" groups=["towers"] instance=ExtResource("1_2nr1r")]
 tower_range = 5.0
+damage = 1.0
+fire_rate = 4.0
 
 [node name="LaserShot" parent="Laser" index="0" instance=ExtResource("2_avygr")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1555789, 0.87635046)
@@ -133,8 +134,6 @@ metadata/_custom_type_script = "uid://baflu1sdbq7c2"
 [node name="Firing" type="Node" parent="StateMachine" index="3" node_paths=PackedStringArray("_firing", "_rotator", "_shot")]
 script = SubResource("GDScript_ubryo")
 _firing = NodePath("../../Firing")
-_fire_time = 0.2
-_damage = 1.0
 _rotator = NodePath("../../Laser")
 _shot = NodePath("../../Laser/LaserShot")
 metadata/_custom_type_script = "uid://baflu1sdbq7c2"

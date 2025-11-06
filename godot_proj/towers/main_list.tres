@@ -1,9 +1,12 @@
-[gd_resource type="Resource" script_class="TowerList" load_steps=7 format=3 uid="uid://cbtbsof0tjacl"]
+[gd_resource type="Resource" script_class="TowerList" load_steps=13 format=3 uid="uid://cbtbsof0tjacl"]
 
 [ext_resource type="Script" uid="uid://y312ckv7xgqe" path="res://towers/tower_list.gd" id="1_5vnca"]
 [ext_resource type="Script" uid="uid://byokdl4jwbeji" path="res://towers/tower_desc.gd" id="2_ffdx6"]
 [ext_resource type="PackedScene" uid="uid://cxpnq2n7fumbq" path="res://towers/laser_tower/test_tower.tscn" id="3_fb32k"]
 [ext_resource type="PackedScene" uid="uid://xt1bnv7ml8er" path="res://towers/gun_tower.tscn" id="4_e6f0u"]
+[ext_resource type="PackedScene" uid="uid://cs12sdtlrujie" path="res://upgrades/range_upgrade/range_upgrade.tscn" id="5_e6f0u"]
+[ext_resource type="PackedScene" uid="uid://cn058d8h34emf" path="res://upgrades/power_upgrade/power_tower.tscn" id="6_u6ird"]
+[ext_resource type="PackedScene" uid="uid://cxressfuvnxy" path="res://upgrades/speed_upgrade/speed_upgrade.tscn" id="7_augmu"]
 
 [sub_resource type="Resource" id="Resource_u6ird"]
 script = ExtResource("2_ffdx6")
@@ -19,7 +22,31 @@ tower_name = "Gun Tower"
 cost = 60
 metadata/_custom_type_script = "uid://byokdl4jwbeji"
 
+[sub_resource type="Resource" id="Resource_fb32k"]
+script = ExtResource("2_ffdx6")
+file = ExtResource("5_e6f0u")
+tower_name = "Range Upgrade"
+cost = 30
+tower_type = 1
+metadata/_custom_type_script = "uid://byokdl4jwbeji"
+
+[sub_resource type="Resource" id="Resource_it347"]
+script = ExtResource("2_ffdx6")
+file = ExtResource("6_u6ird")
+tower_name = "Power Upgrade"
+cost = 50
+tower_type = 1
+metadata/_custom_type_script = "uid://byokdl4jwbeji"
+
+[sub_resource type="Resource" id="Resource_srr1o"]
+script = ExtResource("2_ffdx6")
+file = ExtResource("7_augmu")
+tower_name = "Speed Upgrade"
+cost = 30
+tower_type = 1
+metadata/_custom_type_script = "uid://byokdl4jwbeji"
+
 [resource]
 script = ExtResource("1_5vnca")
-towers = Array[ExtResource("2_ffdx6")]([SubResource("Resource_u6ird"), SubResource("Resource_augmu")])
+towers = Array[ExtResource("2_ffdx6")]([SubResource("Resource_u6ird"), SubResource("Resource_augmu"), SubResource("Resource_fb32k"), SubResource("Resource_it347"), SubResource("Resource_srr1o")])
 metadata/_custom_type_script = "uid://y312ckv7xgqe"
